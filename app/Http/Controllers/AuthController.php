@@ -59,6 +59,7 @@ public function showRegistrationForm ()
 
        return Inertia::render('Auth/Register');
     }
+    
      
     public function logout()
     {
