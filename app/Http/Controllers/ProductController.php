@@ -22,6 +22,7 @@ class ProductController extends Controller
                         'price' => number_format($product->price, 2),
                         'qty' => $product->qty,
                         'image_url' => $product->image ? asset('storage/' . $product->image) : null,
+                        'created_at' => $product->created_at->format('Y-m-d H:i'),
                     ];
                 });
 

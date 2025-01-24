@@ -1,10 +1,12 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { usePage, Link } from '@inertiajs/vue3';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
+import { usePage, Link, router } from '@inertiajs/vue3';
+import Sidebar from '@/Components/Sidebar.vue';
 
 const user = computed(() => usePage().props.auth.user);
 const appName = computed(() => usePage().props.appName || 'Laravel 11');
 const showDropdown = ref(false);
+const sidebarOpen = ref(localStorage.getItem('sidebarOpen') === 'true');
 
 const toggleDropdown = () => {
     showDropdown.value = !showDropdown.value;
@@ -14,6 +16,15 @@ const closeDropdown = (e) => {
     if (!e.target.closest('.dropdown')) {
         showDropdown.value = false;
     }
+};
+
+const handleLogout = () => {
+    router.post(route('logout'));
+};
+
+const handleSidebarChange = (isOpen) => {
+    sidebarOpen.value = isOpen;
+    localStorage.setItem('sidebarOpen', isOpen);
 };
 
 onMounted(() => {
@@ -26,17 +37,20 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-white">
-        <header class="w-full bg-white-800 shadow-md py-4">
-            <div class="container mx-auto flex justify-between items-center px-6">
-                <Link :href="route('dashboard')" class="text-white text-lg">{{ appName }}</Link>
-                
-                <div class="flex-1 flex justify-center space-x-8">
-                    <Link :href="route('dashboard')" class="hover:underline hover:text-orange-500 text-white">Home</Link>
-                    <Link :href="route('product.index')" class="hover:underline hover:text-orange-500 text-white">Products</Link>
-                </div>
-                
-                <div class="dropdown relative mr-7">
+    <div class="min-h-screen bg-gray-100">
+        <header class="fixed top-0 right-0 w-full bg-white-800 shadow-md py-9 z-30 flex justify-center items-center">
+            <div 
+                :class="[
+                    'absolute left-0 transition-transform duration-300 ease-in-out px-5 flex items-center',
+                    sidebarOpen ? 'left-64' : 'left-0'
+                ]"
+            >
+                <Sidebar @sidebar-changed="handleSidebarChange" class="inline-flex" />
+                <Link :href="route('dashboard')" class="text-white text-lg ml-2">{{ appName }}</Link>
+            </div>
+
+            <div class="absolute right-0 px-8">
+                <div class="dropdown relative">
                     <button 
                         v-if="user" 
                         @click="toggleDropdown"
@@ -48,30 +62,28 @@ onUnmounted(() => {
                         </svg>
                     </button>
                     <div v-show="showDropdown" class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-1 z-10">
-                        <Link 
-                            href="/profile" 
-                            class="block text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 "
-                        >
-                                                    Manage Profile
-                        </Link>
+                        <Link :href="route('profile.index')" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left">Manage Profile</Link>
                         <div class="border-t border-gray-200"></div>
-                        <Link 
-                            :href="route('logout')" 
-                            method="post" 
-                            class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                        >
-                            Log out 
-                        </Link>
+
+                        <button @click="handleLogout" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left">
+                            Logout
+                        </button>
                     </div>
                 </div>
             </div>
         </header>
-        <main class="flex-grow w-full flex flex-col items-center justify-center">
-            <slot />
-        </main>
-        <footer class="w-full py-4 bg-black text-center">
-            <p>© 2021 Laravel 11</p>
-        </footer>
+
+        <!-- Main layout with sidebar -->
+        <div class="flex pt-20">
+            <main :class="[
+                'flex-1 p-20 transform flex justify-center',
+                sidebarOpen ? 'transition-transform duration-500 ease-in-out ml-64' : 'transition-transform duration-100 delay-150 ease-in-out ml-0'
+            ]">
+                <div class="w-full max-w-7xl">
+                    <slot />
+                </div>
+            </main>
+        </div>
     </div>
 </template>
 
@@ -86,5 +98,10 @@ onUnmounted(() => {
     right: 0;
     min-width: 160px;
     z-index: 1;
+}
+
+.transform {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
 }
 </style>
