@@ -1,6 +1,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import { defineProps } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     product: Object
@@ -22,9 +23,20 @@ const handleFileChange = (event) => {
 const submit = () => {
     form.put(route('product.update', props.product.id), {
         onSuccess: () => {
-            // Optionally show a success message or navigate
+            alert('Product updated successfully');
+            form.reset();
         },
     });
+};
+
+const deleteProduct = () => {
+    if (confirm('Are you sure you want to delete this product?')) {
+        router.delete(route('product.destroy', props.product.id), {
+            onSuccess: () => {
+                window.location.href = route('product.index');
+            },
+        });
+    }
 };
 </script>
 
@@ -79,11 +91,11 @@ const submit = () => {
                 </div>
               
 
-                <!-- Submit Button -->
+                <!-- Submit and Action Buttons -->
                 <div>
                     <button type="submit" class="bg-blue-500 text-white px-5 py-2 rounded">Update Product</button>
-                     <Link href="/product" class="bg-green-500 text-white px-4 py-2 rounded">Back</Link>
-                     <Link href="/product/destroy" class="bg-red-500 text-white px-4 py-2 rounded">Delete</Link>
+                    <Link href="/product" class="bg-green-500 text-white px-4 py-2 rounded">Back</Link>
+                    <button type="button" @click="deleteProduct" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
                 </div>
             </form>
         </div>

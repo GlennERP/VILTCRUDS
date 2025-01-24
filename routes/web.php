@@ -13,7 +13,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -31,4 +31,6 @@ Route::middleware(['auth'])->group(function () {  //authenticated login
     Route::delete('/product/{product}', [ProductController::class, 'destroy'])->name('product.destroy');
 });
 
-Route::get ('/about', [AuthController::class, 'showAboutPage'])->name('about');
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');

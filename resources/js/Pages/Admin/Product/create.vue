@@ -15,7 +15,12 @@ const handleFileChange = (event) => {
 };
 
 const submit = () => {
-    form.post(route('product.store'));
+    form.post(route('product.store'), {
+        onSuccess: () => {
+            alert('Product added successfully');
+            form.reset();
+        }
+    });
 };
 </script>
 <template>

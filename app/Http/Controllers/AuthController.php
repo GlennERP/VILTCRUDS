@@ -15,31 +15,29 @@ class AuthController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
-        if (auth()->attempt(['email' => $data['email'], 'password' => $data['password']])) {
-            $request->session()->regenerate();
 
-            return redirect()->route('dashboard'); // Redirect to the dashboard
+        if (auth()->attempt($data)) {
+            $request->session()->regenerate();
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ]);
-
-        return Inertia::render('Auth/Login');
     }
 
+    public function showLoginForm()
+    {
+        return Inertia::render ('Auth/Login');
+    }
 
+    public function showRegistrationForm()
+    {
+        return Inertia::render('Auth/Register', [
+           
+        ]);
+    }
 
-public function showLoginForm()
-{
-    return Inertia::render ('Auth/Login');
-}
-
-public function showRegistrationForm ()
-{
-
-    return Inertia::render ('Auth/Register');
-}
     public function register(Request $request)
     {
         //VALIDATION OF DATA TYPES
@@ -57,10 +55,9 @@ public function showRegistrationForm ()
             'contact' => $data['contact'],
         ]);
 
-       return Inertia::render('Auth/Register');
+        return redirect()->route('login')->with('message', 'Registration successful! Please login.');
     }
-    
-     
+
     public function logout()
     {
         auth()->logout();

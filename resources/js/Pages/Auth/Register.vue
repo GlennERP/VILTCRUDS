@@ -1,6 +1,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 
+
 const form = useForm({
     name: '',
     email: '',
@@ -24,7 +25,7 @@ const submit = () => {
 
 <template>
 <GuestLayout>
-    <Head :title="setTitle('Register')" />
+    <Head title="Register" />
     <div>
         <h1 class="title">Register your account</h1>
 

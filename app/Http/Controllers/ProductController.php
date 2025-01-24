@@ -8,21 +8,29 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Product::query();
+        try {
+            $products = Product::latest()
+                ->get()
+                ->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'category' => $product->category,
+                        'description' => $product->description,
+                        'price' => number_format($product->price, 2),
+                        'qty' => $product->qty,
+                        'image_url' => $product->image ? asset('storage/' . $product->image) : null,
+                    ];
+                });
 
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('category', 'like', '%' . $request->search . '%');
+            return Inertia::render('Admin/Product/index', [
+                'products' => $products
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred while fetching products.');
         }
-
-        $products = $query->paginate(10)->appends($request->only('search'));
-
-        return Inertia::render('Admin/Product/index', [
-            'products' => $products,
-            'filters' => $request->only(['search']),
-        ]);
     }
 
     public function create()
@@ -53,7 +61,7 @@ class ProductController extends Controller
         ]);
 
 
-        return redirect()->route('product');
+        return redirect()->route('product.store');
     }
 
     public function update(Request $request, Product $product)
@@ -80,14 +88,14 @@ class ProductController extends Controller
 
         $product->update(array_filter($data));
 
-        return redirect()->route('product');
+        return redirect()->route('product.index');
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
-       
-        return redirect()->route('product');
-
+        return redirect()->route('product.index')
+            ->with('message', 'Product deleted successfully.')
+            ->with('type', 'success');
     }
 }
